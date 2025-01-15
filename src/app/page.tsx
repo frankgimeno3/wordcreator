@@ -6,6 +6,11 @@ import PizZip from "pizzip";
 import Docxtemplater from "docxtemplater";
 import { saveAs } from "file-saver";
 
+// Define a specific error interface for better type safety
+interface TemplateError extends Error {
+  properties?: any;
+}
+
 export default function Page() {
   const [name, setName] = useState("");
   const [date, setDate] = useState("");
@@ -35,11 +40,11 @@ export default function Page() {
       const blob = doc.getZip().generate({ type: "blob" });
       saveAs(blob, "documento-generado.docx");
     } catch (error) {
-      // Chequeo explícito del tipo de error
       if (error instanceof Error) {
-        if (error.name === "TemplateError") {
-          console.error("Error en la plantilla:", error);
-          console.error("Detalles del error:", (error as any).properties); // TypeScript no reconoce automáticamente properties
+        const templateError = error as TemplateError;
+        if (templateError.name === "TemplateError") {
+          console.error("Error en la plantilla:", templateError);
+          console.error("Detalles del error:", templateError.properties);
           alert(
             "Se encontró un error en la plantilla. Revisa los logs de la consola para más detalles."
           );
